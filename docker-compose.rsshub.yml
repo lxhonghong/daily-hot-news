@@ -1,0 +1,26 @@
+services:
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: rsshub
+    restart: always
+    ports:
+      - "1200:1200"
+    environment:
+      # 知乎 Cookie（获取全文需要）
+      # 获取方式：浏览器登录知乎 → F12 → Application → Cookies → 复制完整 cookie 字符串
+      ZHIHU_COOKIES: "${ZHIHU_COOKIES:-}"
+      # 请求超时（毫秒）
+      REQUEST_TIMEOUT: "15000"
+      # 缓存过期时间（秒）
+      CACHE_EXPIRE: "300"
+      CACHE_CONTENT_EXPIRE: "3600"
+      # 请求重试次数
+      REQUEST_RETRY: "2"
+      # 允许的端口（默认1200）
+      PORT: "1200"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1200/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

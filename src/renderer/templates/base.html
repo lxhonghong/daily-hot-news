@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}每日热点速递{% endblock %}</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <div class="header-title">📰 每日热点速递</div>
+                <div class="header-date">{{ date }}</div>
+            </div>
+            <div class="header-archive">
+                <a href="archive/">📚 历史存档</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        {% for cat_key, cat_data in categories.items() %}
+        <a href="#{{ cat_key }}" class="tab-link{% if loop.first %} active{% endif %}" onclick="switchTab('{{ cat_key }}')">{{ cat_data.label }}</a>
+        {% endfor %}
+    </nav>
+
+    <main class="content">
+        {% for cat_key, cat_data in categories.items() %}
+        <div id="{{ cat_key }}" class="section{% if loop.first %} active{% endif %}">
+            <div class="section-header">
+                <div class="section-title">{{ cat_data.label }}</div>
+                <div class="section-count">共 {{ cat_data.entries|length }} 条</div>
+            </div>
+            {% for item in cat_data.entries %}
+            <div class="card" data-importance="{{ item.importance }}">
+                <div class="card-title">
+                    <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+                </div>
+                <div class="card-summary">{{ item.summary }}</div>
+                {% if item.impact %}
+                <div class="card-impact">💡 {{ item.impact }}</div>
+                {% endif %}
+                <div class="card-meta">
+                    <span>
+                        <span class="card-source">{{ item.source }}</span>
+                        <span class="card-stars">{% for i in range(item.importance) %}★{% endfor %}{% for i in range(5 - item.importance) %}☆{% endfor %}</span>
+                    </span>
+                    <a class="card-link" href="{{ item.url }}" target="_blank" rel="noopener">原文 →</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div>数据来源: RSSHub · CurrentsAPI · arXiv · BBC · HN</div>
+            <div>由 GLM-5.1 生成摘要 · <a href="https://github.com/">GitHub</a></div>
+        </div>
+    </footer>
+
+    <script>
+    function switchTab(tabId) {
+        // 隐藏所有 section
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        // 取消所有 tab 激活
+        document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+        // 显示目标 section
+        document.getElementById(tabId).classList.add('active');
+        // 激活目标 tab
+        document.querySelector('a[href="#' + tabId + '"]').classList.add('active');
+        // 更新 URL hash
+        history.replaceState(null, '', '#' + tabId);
+    }
+
+    // 页面加载时根据 hash 激活对应 tab
+    (function() {
+        var hash = window.location.hash.slice(1);
+        if (hash && document.getElementById(hash)) {
+            switchTab(hash);
+        }
+    })();
+    </script>
+</body>
+</html>
