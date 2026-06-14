@@ -44,6 +44,8 @@ CATEGORY_LABELS: dict[Category, str] = {
     Category.AI_TECH: "AI / 科技",
     Category.INTERNATIONAL: "国际形势",
     Category.DOMESTIC: "国内形势",
+    Category.DEV_TOOLS: "编程工具",
+    Category.AI_GITHUB: "AI 开源飙升榜",
 }
 
 
@@ -119,6 +121,54 @@ PROMPT_TEMPLATES: dict[Category, str] = {
 ]
 
 今日新闻条目：
+---
+{news_items}
+---""",
+    Category.DEV_TOOLS: """你是一位资深开发者工具分析师。以下是今日编程工具/IDE/语言领域的动态。
+
+任务：
+1. 去重合并：将同一工具的多条更新合并为一条
+2. 中文摘要：2-3 句摘要，工具名/版本号保留英文（如 VS Code 1.99、JetBrains Rider 2026.1、Python 3.14、Rust 1.88 等）
+3. 影响分析：1 句话分析对开发者工作流或生态的影响
+4. 重要性评级：1-5 星（5 = 重大版本/生态变化，3 = 值得关注，1 = 小更新）
+
+输出严格 JSON 数组，不要任何额外文本、markdown 代码块或解释：
+[
+  {{
+    "title": "中文标题",
+    "summary": "摘要内容...",
+    "impact": "影响分析...",
+    "importance": 4,
+    "source": "来源名称",
+    "url": "原始链接"
+  }}
+]
+
+今日新闻条目：
+---
+{news_items}
+---""",
+    Category.AI_GITHUB: """你是一位 AI 开源生态分析师。以下是今日 GitHub 上 AI 相关项目的 star 飙升榜和当前排名数据。
+
+任务：
+1. 去重合并：将同一项目在不同数据源中的条目合并
+2. 项目简介：为每个项目写 1-2 句简介，说明它做什么、解决什么问题，技术关键词保留英文（如 Transformer、LLM、RAG、Diffusion、RLHF 等）
+3. 推荐理由：1 句话分析为什么这个项目值得关注或 star 增长快
+4. 重要性评级：1-5 星（5 = 现象级项目/可能改变生态，3 = 值得尝试，1 = 一般关注）
+
+输出严格 JSON 数组，不要任何额外文本、markdown 代码块或解释：
+[
+  {{
+    "title": "项目名（保留英文原名）",
+    "summary": "项目简介...",
+    "impact": "推荐理由...",
+    "importance": 4,
+    "source": "来源名称",
+    "url": "原始链接"
+  }}
+]
+
+今日项目数据：
 ---
 {news_items}
 ---""",

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from src.collectors.rss_collector import Category, collect_all_feeds
 from src.collectors.currents import collect_currents
+from src.collectors.github_trending import collect_github_trending
 from src.config import settings
 from src.processor.deduper import deduplicate_all
 from src.processor.summarizer import process_all
@@ -74,6 +75,7 @@ async def run_pipeline() -> bool:
         logger.info("[Phase 1] 采集开始...")
         rss_results = await collect_all_feeds()
         currents_results = await collect_currents()
+        github_results = await collect_github_trending()
 
         # 合并 RSS 和 CurrentsAPI 数据
         combined: dict[Category, list] = {
@@ -81,6 +83,8 @@ async def run_pipeline() -> bool:
             Category.INTERNATIONAL: rss_results[Category.INTERNATIONAL]
             + currents_results[Category.INTERNATIONAL],
             Category.DOMESTIC: rss_results[Category.DOMESTIC] + currents_results[Category.DOMESTIC],
+            Category.DEV_TOOLS: rss_results[Category.DEV_TOOLS],
+            Category.AI_GITHUB: github_results[Category.AI_GITHUB],
         }
 
         total_raw = sum(len(v) for v in combined.values())

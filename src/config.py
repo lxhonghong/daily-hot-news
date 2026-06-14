@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     http_proxy: str = "http://127.0.0.1:54771"
     https_proxy: str = "http://127.0.0.1:54771"
 
+    # ===== GitHub API Token（可选，提升速率限制）=====
+    github_token: str = ""
+
     # ===== Git 配置 =====
     git_repo_dir: str = str(PROJECT_DIR)
 
@@ -61,11 +64,11 @@ class Settings(BaseSettings):
 
     # ===== LLM 参数 =====
     # LLM 请求超时（秒）
-    llm_timeout: float = 60.0
+    llm_timeout: float = 120.0
     # LLM 重试次数
     llm_max_retries: int = 3
     # 每批发给 LLM 的最大新闻条数
-    llm_batch_size: int = 20
+    llm_batch_size: int = 15
 
 
 # 全局单例

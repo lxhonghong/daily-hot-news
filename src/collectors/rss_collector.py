@@ -23,6 +23,8 @@ class Category(str, Enum):
     AI_TECH = "ai_tech"
     INTERNATIONAL = "international"
     DOMESTIC = "domestic"
+    DEV_TOOLS = "dev_tools"
+    AI_GITHUB = "ai_github"
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,11 @@ FEED_SOURCES: list[FeedSource] = [
     FeedSource("澎湃新闻", "{rsshub}/thepaper/featured", Category.DOMESTIC),
     FeedSource("观察者网", "{rsshub}/guancha/headline", Category.DOMESTIC),
     FeedSource("人民网", "{rsshub}/people", Category.DOMESTIC),
+    # --- 编程工具动态 ---
+    FeedSource("GitHub Blog", "https://github.blog/feed/", Category.DEV_TOOLS, needs_proxy=True),
+    FeedSource("JetBrains Blog", "https://blog.jetbrains.com/feed/", Category.DEV_TOOLS, needs_proxy=True),
+    FeedSource("VS Code Releases", "https://github.com/microsoft/vscode/releases.atom", Category.DEV_TOOLS, needs_proxy=True),
+    FeedSource("HN Show", "https://hnrss.org/show?points=50", Category.DEV_TOOLS, needs_proxy=True),
 ]
 
 
@@ -140,6 +147,8 @@ async def collect_all_feeds() -> dict[Category, list[RawItem]]:
         Category.AI_TECH: [],
         Category.INTERNATIONAL: [],
         Category.DOMESTIC: [],
+        Category.DEV_TOOLS: [],
+        Category.AI_GITHUB: [],
     }
 
     try:
