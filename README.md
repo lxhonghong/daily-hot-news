@@ -69,3 +69,4 @@ src/
     ├── html_builder.py  # HTML 生成
     └── templates/       # Jinja2 模板
 ```
+# daily-hot-news
