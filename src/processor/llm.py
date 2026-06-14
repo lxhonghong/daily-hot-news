@@ -26,7 +26,7 @@ class LLMClient:
         self._timeout = settings.llm_timeout
         self._max_retries = settings.llm_max_retries
 
-    def chat(self, prompt: str, max_tokens: int = 4096) -> str:
+    def chat(self, prompt: str, max_tokens: int = 8192) -> str:
         """发送 prompt 并返回文本响应，带重试逻辑"""
 
         for attempt in range(1, self._max_retries + 1):
@@ -47,7 +47,7 @@ class LLMClient:
                         text += block.text
 
                 logger.info(
-                    "LLM 响应完成: %d tokens, 耗时 %.1fs (尝试 %d/%d)",
+                    "LLM 响应完成: %d 字符, 耗时 %.1fs (尝试 %d/%d)",
                     len(text),
                     elapsed,
                     attempt,

@@ -205,7 +205,10 @@ def process_category(
     category: Category,
     items: list[RawItem],
 ) -> ProcessedCategory:
-    """处理单个方向的新闻：LLM 摘要 + 影响分析"""
+    """处理单个方向的新闻：LLM 摘要 + 影响分析
+
+    如果新闻条数超过 llm_batch_size，分批处理后合并。
+    """
 
     label = CATEGORY_LABELS[category]
 
@@ -215,33 +218,61 @@ def process_category(
 
     logger.info("[%s] 处理 %d 条原始新闻...", label, len(items))
 
-    # 构建 prompt
-    news_text = _format_news_items(items, max_items=settings.llm_batch_size)
-    prompt = PROMPT_TEMPLATES[category].format(news_items=news_text)
+    # 如果条数超过 batch_size，分批处理
+    batch_size = settings.llm_batch_size
+    all_parsed: list[dict[str, Any]] = []
 
-    # 调用 LLM
-    client = get_llm_client()
-    response = client.chat(prompt)
+    if len(items) <= batch_size:
+        batches = [items]
+    else:
+        batches = [items[i : i + batch_size] for i in range(0, len(items), batch_size)]
+        logger.info("[%s] 分 %d 批处理", label, len(batches))
 
-    if not response:
-        logger.warning("[%s] LLM 无响应，降级为原始摘要", label)
-        fallback_items = _raw_items_to_fallback(items)
-        return ProcessedCategory(label=label, items=fallback_items)
+    for batch_idx, batch in enumerate(batches):
+        news_text = _format_news_items(batch, max_items=batch_size)
+        prompt = PROMPT_TEMPLATES[category].format(news_items=news_text)
 
-    # 解析 JSON
-    parsed = _parse_json_response(response)
+        # 调用 LLM（大批量需要更多输出 token）
+        client = get_llm_client()
+        max_tokens = min(8192, len(batch) * 300)
+        response = client.chat(prompt, max_tokens=max_tokens)
 
-    if not parsed:
-        logger.warning("[%s] JSON 解析失败，降级为原始摘要", label)
+        if not response:
+            logger.warning("[%s] 第 %d 批 LLM 无响应", label, batch_idx + 1)
+            continue
+
+        # 解析 JSON
+        parsed = _parse_json_response(response)
+
+        if not parsed:
+            logger.warning("[%s] 第 %d 批 JSON 解析失败", label, batch_idx + 1)
+            # 降级：本批使用原始摘要
+            fallback = [
+                {
+                    "title": item.title,
+                    "summary": item.summary[:150] + "..." if len(item.summary) > 150 else item.summary or "暂无摘要",
+                    "impact": "暂无影响分析",
+                    "importance": 3,
+                    "source": item.source_name,
+                    "url": item.url,
+                }
+                for item in batch[: settings.max_items_per_category]
+            ]
+            all_parsed.extend(fallback)
+        else:
+            all_parsed.extend(parsed)
+
+    if not all_parsed:
+        logger.warning("[%s] 全部批次处理失败，降级为原始摘要", label)
         fallback_items = _raw_items_to_fallback(items)
         return ProcessedCategory(label=label, items=fallback_items)
 
     # 转换为 NewsItem 列表
     news_items: list[NewsItem] = []
-    for entry in parsed:
+    for entry in all_parsed:
         try:
             importance = int(entry.get("importance", 3))
-            importance = max(1, min(5, importance))  # 限制在 1-5 范围内
+            importance = max(1, min(5, importance))
 
             news_items.append(
                 NewsItem(

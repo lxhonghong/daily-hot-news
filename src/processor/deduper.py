@@ -1,9 +1,9 @@
-"""新闻去重：URL 去重 + 标题相似度去重"""
+"""新闻去重：URL 去重 + 标题相似度去重 + HTML 标签清理"""
 
 from __future__ import annotations
 
 import logging
-from dataclasses import replace
+import re
 from typing import Sequence
 
 from Levenshtein import ratio as levenshtein_ratio
@@ -16,22 +16,58 @@ logger = logging.getLogger(__name__)
 SIMILARITY_THRESHOLD = 0.75
 
 
+def _clean_html(text: str) -> str:
+    """清理 HTML 标签和多余空白"""
+
+    # 去除 HTML 标签
+    text = re.sub(r"<[^>]+>", "", text)
+    # 去除多余空白
+    text = re.sub(r"\s+", " ", text).strip()
+    # 去除 &nbsp; 等 HTML 实体
+    text = re.sub(r"&[a-zA-Z]+;", " ", text)
+    return text
+
+
+def _clean_item(item: RawItem) -> RawItem:
+    """清理单条新闻的 HTML 内容"""
+
+    clean_summary = _clean_html(item.summary) if item.summary else ""
+    clean_title = _clean_html(item.title) if item.title else ""
+
+    # 标题通常不需要清理，但摘要经常包含 HTML
+    if clean_summary == item.summary and clean_title == item.title:
+        return item
+
+    return RawItem(
+        title=clean_title or item.title,
+        url=item.url,
+        summary=clean_summary,
+        source_name=item.source_name,
+        category=item.category,
+        published=item.published,
+    )
+
+
 def deduplicate(items: list[RawItem]) -> list[RawItem]:
     """对新闻列表进行去重
 
     去重策略：
-    1. URL 精确去重：同一 URL 只保留一条
-    2. 标题相似度去重：Levenshtein 相似度 > 阈值的视为同一条
+    1. HTML 清理：去除摘要中的 HTML 标签
+    2. URL 精确去重：同一 URL 只保留一条
+    3. 标题相似度去重：Levenshtein 相似度 > 阈值的视为同一条
     """
 
     if not items:
         return items
 
+    # 先清理 HTML
+    cleaned = [_clean_item(item) for item in items]
+
     # 第一步：URL 精确去重
     seen_urls: set[str] = set()
     url_deduped: list[RawItem] = []
 
-    for item in items:
+    for item in cleaned:
         # 规范化 URL：去掉尾部斜杠和查询参数中的追踪参数
         normalized_url = item.url.rstrip("/")
         if normalized_url not in seen_urls:
