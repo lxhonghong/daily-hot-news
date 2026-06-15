@@ -66,18 +66,19 @@ def render_daily_page(
 
     # 渲染首页
     template = _template_env.get_template("base.html")
-    html = template.render(**template_data)
+    html = template.render(**template_data, css_path="style.css")
 
     index_path = output_dir / "index.html"
     index_path.write_text(html, encoding="utf-8")
     logger.info("首页已生成: %s", index_path)
 
-    # 渲染归档页面（按日期）
+    # 渲染归档页面（按日期）— 需要修正 CSS 相对路径
     archive_dir = output_dir / "archive"
     archive_dir.mkdir(parents=True, exist_ok=True)
 
+    archive_html = template.render(**template_data, css_path="../style.css")
     archive_path = archive_dir / f"{target_date.isoformat()}.html"
-    archive_path.write_text(html, encoding="utf-8")
+    archive_path.write_text(archive_html, encoding="utf-8")
     logger.info("归档页面已生成: %s", archive_path)
 
     # 保存 JSON 数据文件
