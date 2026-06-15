@@ -192,6 +192,7 @@ def main() -> None:
 
     if success:
         logger.info("✅ 全流程成功完成")
+        notify_macos("每日热点速递", "✅ 日报已生成并部署")
     else:
         logger.error("❌ 全流程失败")
         notify_macos("每日热点速递", "⚠️ 日报生成失败，请检查日志")
