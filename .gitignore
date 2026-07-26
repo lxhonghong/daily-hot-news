@@ -27,3 +27,9 @@ logs/
 
 # RSSHub 数据
 rsshub-data/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
