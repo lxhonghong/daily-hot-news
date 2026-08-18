@@ -85,6 +85,7 @@ async def run_pipeline() -> bool:
             Category.DOMESTIC: rss_results[Category.DOMESTIC] + currents_results[Category.DOMESTIC],
             Category.DEV_TOOLS: rss_results[Category.DEV_TOOLS],
             Category.AI_GITHUB: github_results[Category.AI_GITHUB],
+            Category.AI_STARTUP: rss_results[Category.AI_STARTUP],
         }
 
         total_raw = sum(len(v) for v in combined.values())

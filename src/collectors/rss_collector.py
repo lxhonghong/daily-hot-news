@@ -25,6 +25,7 @@ class Category(str, Enum):
     DOMESTIC = "domestic"
     DEV_TOOLS = "dev_tools"
     AI_GITHUB = "ai_github"
+    AI_STARTUP = "ai_startup"
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,12 @@ FEED_SOURCES: list[FeedSource] = [
     FeedSource("JetBrains Blog", "https://blog.jetbrains.com/feed/", Category.DEV_TOOLS, needs_proxy=True),
     FeedSource("VS Code Releases", "https://github.com/microsoft/vscode/releases.atom", Category.DEV_TOOLS, needs_proxy=True),
     FeedSource("HN Show", "https://hnrss.org/show?points=50", Category.DEV_TOOLS, needs_proxy=True),
+    # --- AI 副业机会 ---
+    FeedSource("ProductHunt", "https://www.producthunt.com/feed", Category.AI_STARTUP, needs_proxy=True),
+    FeedSource("dev.to AI", "https://dev.to/feed/tag/ai", Category.AI_STARTUP, needs_proxy=True),
+    FeedSource("dev.to SideProjects", "https://dev.to/feed/tag/sideprojects", Category.AI_STARTUP, needs_proxy=True),
+    FeedSource("HackerNoon AI", "https://hackernoon.com/tagged/ai/feed", Category.AI_STARTUP, needs_proxy=True),
+    FeedSource("IndieHackers", "https://feed.indiehackers.world/posts.atom", Category.AI_STARTUP, needs_proxy=True),
 ]
 
 
@@ -149,6 +156,7 @@ async def collect_all_feeds() -> dict[Category, list[RawItem]]:
         Category.DOMESTIC: [],
         Category.DEV_TOOLS: [],
         Category.AI_GITHUB: [],
+        Category.AI_STARTUP: [],
     }
 
     try:
@@ -172,11 +180,12 @@ async def collect_all_feeds() -> dict[Category, list[RawItem]]:
     elapsed = time.monotonic() - start
     total = sum(len(v) for v in results.values())
     logger.info(
-        "RSS 采集完成: 共 %d 条 (AI/科技 %d, 国际 %d, 国内 %d), 耗时 %.1fs",
+        "RSS 采集完成: 共 %d 条 (AI/科技 %d, 国际 %d, 国内 %d, 副业 %d), 耗时 %.1fs",
         total,
         len(results[Category.AI_TECH]),
         len(results[Category.INTERNATIONAL]),
         len(results[Category.DOMESTIC]),
+        len(results[Category.AI_STARTUP]),
         elapsed,
     )
 

@@ -1,6 +1,6 @@
 # 每日热点速递 📰
 
-自动采集 AI/科技、国际形势、国内形势三大方向的每日热点新闻，由 GLM-5.1 生成摘要和影响分析，部署在 Cloudflare Pages 上。
+自动采集 AI/科技、国际形势、国内形势、编程工具、AI 开源飙升榜五大方向的每日热点新闻，由 DeepSeek V4 Flash 生成摘要和影响分析，部署在 Cloudflare Pages 上。
 
 ## 数据源
 
@@ -48,9 +48,8 @@ launchctl load ~/Library/LaunchAgents/com.lx.daily-hot-news.plist
 
 ## 部署
 
-1. 创建 GitHub 仓库
-2. 在仓库 Settings → Secrets 中添加 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`
-3. Push 后 GitHub Actions 自动部署到 Cloudflare Pages
+- Cloudflare Workers + 自定义域名 `news.hotdaily26.xyz`
+- Push 后自动部署，无需 GitHub Actions
 
 ## 项目结构
 
