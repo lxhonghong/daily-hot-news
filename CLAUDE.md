@@ -38,7 +38,7 @@ bash scripts/setup_rsshub.sh
 
 ### 处理层 (`src/processor/`)
 
-- **llm.py**：Anthropic SDK 封装，`base_url=https://www.huolilink.com`，模型 GLM-5.1。指数退避重试，默认 max_tokens=8192。GLM-5.1 偶尔不稳定(502)，需较大超时(120s)。
+- **llm.py**：Anthropic Messages API 调用（token-plan 网关），`base_url=https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic`，Bearer 认证，模型 deepseek-v4-flash-0731。指数退避重试，默认 max_tokens=8192。
 - **deduper.py**：先 `_clean_html()` 清理摘要中的 HTML 标签，再 URL 精确去重 + Levenshtein 标题相似度去重(阈值 0.75)。
 - **summarizer.py**：5 个方向各有独立 prompt 模板，LLM 输出严格 JSON 数组。超过 `llm_batch_size`(15) 条时分批发送，每批独立降级。解析失败时降级为原始摘要（`impact="暂无影响分析"`）。
 
@@ -57,7 +57,7 @@ collect_all_feeds() + collect_currents() + collect_github_trending()
   → git_push(today) → Cloudflare 自动部署
 ```
 
-## 5 个新闻方向
+## 6 个新闻方向
 
 | Category 枚举 | 标签 | 主要数据源 |
 |---|---|---|
@@ -66,10 +66,12 @@ collect_all_feeds() + collect_currents() + collect_github_trending()
 | DOMESTIC | 国内形势 | 知乎、澎湃、观察者网、人民网、CurrentsAPI |
 | DEV_TOOLS | 编程工具 | GitHub Blog、JetBrains Blog、VS Code Releases、HN Show |
 | AI_GITHUB | AI 开源飙升榜 | GitHub Trending CDN、GitHub Search API |
+| AI_STARTUP | AI 副业机会 | ProductHunt、dev.to、HackerNoon、IndieHackers |
 
 ## 关键配置 (.env)
 
-- `ANTHROPIC_API_KEY` + `ANTHROPIC_BASE_URL`：LLM 调用必需
+- `LLM_API_KEY` + `LLM_BASE_URL`：LLM 调用必需（token-plan 网关，与 Claude Code 的 `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_BASE_URL` 一致）
+- `LLM_MODEL`：默认 `deepseek-v4-flash-0731`
 - `CURRENTS_API_KEY`：不配则跳过 CurrentsAPI 采集
 - `ZHIHU_COOKIES`：知乎全文摘要需要，不配只取标题
 - `GITHUB_TOKEN`：可选，提升 GitHub API 速率限制（不配每分钟 10 次也够用）

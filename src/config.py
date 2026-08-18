@@ -20,10 +20,10 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ===== LLM API 配置 =====
-    anthropic_api_key: str = ""
-    anthropic_base_url: str = "https://www.huolilink.com"
-    anthropic_model: str = "GLM-5.1"
+    # ===== LLM API 配置（token-plan 网关，Anthropic Messages API 格式）=====
+    llm_api_key: str = ""
+    llm_base_url: str = "https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic"
+    llm_model: str = "deepseek-v4-flash-0731"
 
     # ===== CurrentsAPI 配置 =====
     currents_api_key: str = ""
